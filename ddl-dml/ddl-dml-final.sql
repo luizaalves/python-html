@@ -1,9 +1,24 @@
 BEGIN TRANSACTION;
+DROP TABLE IF EXISTS "avaliacao";
+CREATE TABLE IF NOT EXISTS "avaliacao" (
+	"id_avaliacao"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	"nome"	TEXT NOT NULL,
+	"feito"	BLOB DEFAULT 0
+);
+DROP TABLE IF EXISTS "questao";
+CREATE TABLE IF NOT EXISTS "questao" (
+	"id_questao"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	"enunciado"	TEXT NOT NULL,
+	"alternativa_id"	INTEGER NOT NULL,
+	"resposta_usuario"	INTEGER,
+	FOREIGN KEY("alternativa_id") REFERENCES "alternativa"("id_alternativa"),
+	FOREIGN KEY("resposta_usuario") REFERENCES "alternativa"("id_alternativa")
+);
 DROP TABLE IF EXISTS "avaliacao_questao";
 CREATE TABLE IF NOT EXISTS "avaliacao_questao" (
 	"avaliacao_id"	INTEGER NOT NULL,
 	"questao_id"	INTEGER NOT NULL,
-	FOREIGN KEY("avaliacao_id") REFERENCES "avaliacao_questao"("id_avaliacao"),
+	FOREIGN KEY("avaliacao_id") REFERENCES "avaliacao"("id_avaliacao"),
 	FOREIGN KEY("questao_id") REFERENCES "questao"("id_questao")
 );
 DROP TABLE IF EXISTS "disciplina_avaliacao";
@@ -11,13 +26,13 @@ CREATE TABLE IF NOT EXISTS "disciplina_avaliacao" (
 	"avaliacao_id"	INTEGER NOT NULL,
 	"disciplina_id"	INTEGER NOT NULL,
 	FOREIGN KEY("avaliacao_id") REFERENCES "avaliacao"("id_avaliacao"),
-	FOREIGN KEY("disciplina_id") REFERENCES "disciplina_avaliacao"("id_disciplina")
+	FOREIGN KEY("disciplina_id") REFERENCES "disciplina"("id_disciplina")
 );
 DROP TABLE IF EXISTS "usuario_disciplina";
 CREATE TABLE IF NOT EXISTS "usuario_disciplina" (
 	"usuario_id"	INTEGER NOT NULL,
 	"disciplina_id"	INTEGER NOT NULL,
-	FOREIGN KEY("usuario_id") REFERENCES "usuario_disciplina"("id_usuario"),
+	FOREIGN KEY("usuario_id") REFERENCES "usuario"("id_usuario"),
 	FOREIGN KEY("disciplina_id") REFERENCES "disciplina"("id_disciplina")
 );
 DROP TABLE IF EXISTS "alternativa";
@@ -26,18 +41,6 @@ CREATE TABLE IF NOT EXISTS "alternativa" (
 	"alternativa"	TEXT NOT NULL,
 	"questao_id"	INTEGER NOT NULL,
 	FOREIGN KEY("questao_id") REFERENCES "questao"("id_questao")
-);
-DROP TABLE IF EXISTS "questao";
-CREATE TABLE IF NOT EXISTS "questao" (
-	"id_questao"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	"enunciado"	TEXT NOT NULL,
-	"alternativa_id"	INTEGER NOT NULL,
-	FOREIGN KEY("alternativa_id") REFERENCES "alternativa"("id_alternativa")
-);
-DROP TABLE IF EXISTS "avaliacao";
-CREATE TABLE IF NOT EXISTS "avaliacao" (
-	"id_avaliacao"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	"nome"	TEXT NOT NULL
 );
 DROP TABLE IF EXISTS "disciplina";
 CREATE TABLE IF NOT EXISTS "disciplina" (
@@ -51,6 +54,26 @@ CREATE TABLE IF NOT EXISTS "usuario" (
 	"email"	TEXT NOT NULL,
 	"senha"	TEXT NOT NULL
 );
+INSERT INTO "avaliacao" VALUES (1,'Avaliação - POO',NULL);
+INSERT INTO "avaliacao" VALUES (2,'Recuperação - POO',NULL);
+INSERT INTO "avaliacao" VALUES (3,'Avaliação - BCD',NULL);
+INSERT INTO "avaliacao" VALUES (4,'Avaliação - STD',NULL);
+INSERT INTO "avaliacao" VALUES (5,'Recuperação - STD',NULL);
+INSERT INTO "questao" VALUES (1,'Sobre a primeira forma normal (1FN), examine as assertivas abaixo.\n\nI - Uma tabela na 1FN pode conter tabelas aninhadas.\n\nII - Uma tabela na 1FN pode possuir apenas atributos atômicos e monovalorados.\n\nIII - Uma tabela na 1FN pode possuir apenas uma chave primária do tipo simples (não composta).\n\nEstá (Estão) correta(s) a(s) assertiva(s)',2,NULL);
+INSERT INTO "questao" VALUES (2,' De acordo com a normalização de entidades em bancos de dados relacionais, a entidade cujos atributos não chave independem de outro atributo não chave está na ',9,NULL);
+INSERT INTO "questao" VALUES (3,'Normalização de dados é um processo que visa eliminar dados redundantes e garantir que a dependência de dados faça sentido. O processo de normalização gera tabelas que se apresentam normalmente em 1FN (primeira forma normal), 2FN (segunda forma normal) e 3FN (terceira forma normal). Assinale a alternativa que indica especificamente a(s) forma(s) normal(is) que aplica a regra “não possuir atributos com dependência transitiva dependentes da chave”:',11,NULL);
+INSERT INTO "questao" VALUES (4,'Em POO, duas ou mais classes, derivadas de uma mesma superclasse, podem invocar métodos que têm a mesma identificação (assinatura), mas comportamentos distintos, especializados para cada classe derivada, usando para tanto uma referência a um objeto do tipo dessa superclasse.\nO texto acima diz respeito a ',20,NULL);
+INSERT INTO "questao" VALUES (5,'Assinale a alternativa correta, considerando o paradigma da orientação a objeto, para as afirmações abaixo:\nCarlos pode andar, correr, pular. Ele tem 25 anos, é casado e trabalha com Tecnologia da Informação e Comunicação então: ',21,NULL);
+INSERT INTO "questao" VALUES (6,' Qual das alternativas a seguir define corretamente o Encapsulamento na programação orientada a objetos? ',29,NULL);
+INSERT INTO "questao" VALUES (7,'Durante o desenvolvimento de uma aplicação orientada a objetos com Java, um Técnico criou uma interface para obrigar um conjunto de classes de diferentes origens a implementar certos métodos de maneiras diferentes, viabilizando a obtenção de polimorfismo. A interface criada pelo Técnico pode ',33,NULL);
+INSERT INTO "questao" VALUES (8,'O Object Pascal é uma linguagem de programação com suporte a orientação a objetos. Sobre as ferramentas utilizadas para programar em Object Pascal, assinale a alternativa correta.',36,NULL);
+INSERT INTO "questao" VALUES (9,'A POO é um modelo de análise, projeto e programação de software baseado na composição e interação entre diversas unidades chamadas de objetos. Assinale a alternativa que apresenta os itens considerados os quatro pilares da POO.',42,NULL);
+INSERT INTO "questao" VALUES (10,'Em sistemas distribuídos, clusterização é o nome que se dá ao processo de interconexão de múltiplas máquinas com o objetivo de obter um aumento de disponibilidade, desempenho ou capacidade total de um sistema. Em relação à clusterização é correto afirmar:',44,NULL);
+INSERT INTO "questao" VALUES (11,'Computadores de baixo custo podem ser agrupados em clusters, onde exercem funções que exigem alto desempenho computacional como se fossem uma única máquina de grande porte. É correto afirmar que um cluster Beowulf com o sistema operacional Linux é constituído de vários nós escravos,',48,NULL);
+INSERT INTO "questao" VALUES (12,'O multiprocessamento simétrico pode ser implementado, por meio de clusters de servidores, usando-se o método secundário ativo, no qual um servidor secundário assume o processamento em caso de falha do servidor primário. Assinale a opção que apresenta corretamente uma justificativa para o uso do método secundário ativo.',50,NULL);
+INSERT INTO "questao" VALUES (13,'Assinale a opção que contém uma regra INVÁLIDA para Redes de Petri',53,NULL);
+INSERT INTO "questao" VALUES (14,'Sobre o processamento paralelo e distribuído, assinale a afirmação correta.',55,NULL);
+INSERT INTO "questao" VALUES (15,'Um sistema distribuído é definido como uma coleção de computadores independentes que se apresenta ao usuário como um sistema único e consistente. Baseado nos conceitos definidos para sistemas distribuídos, identifique a afirmativa ERRADA:',60,NULL);
 INSERT INTO "avaliacao_questao" VALUES (3,1);
 INSERT INTO "avaliacao_questao" VALUES (3,2);
 INSERT INTO "avaliacao_questao" VALUES (3,3);
@@ -136,26 +159,6 @@ INSERT INTO "alternativa" VALUES (57,'Em programação paralela não é necessá
 INSERT INTO "alternativa" VALUES (58,'Um sistema distribuído fracamente acoplado permite que máquinas e usuários do ambiente sejam fundamentalmente independentes, bem como a interação de forma limitada, quando isto for necessário, compartilhando recursos como discos e impressoras, entre outros.',15);
 INSERT INTO "alternativa" VALUES (59,'O modelo de computação distribuída Peer-to-Peer é uma tecnologia que estabelece uma espécie de rede virtual de computadores, onde cada estação tem capacidades e responsabilidades equivalentes.',15);
 INSERT INTO "alternativa" VALUES (60,'Uma vantagem dos sistemas distribuídos sobre os sistemas centralizados é a disponibilidade de software para este tipo de ambiente.',15);
-INSERT INTO "questao" VALUES (1,'Sobre a primeira forma normal (1FN), examine as assertivas abaixo.\n\nI - Uma tabela na 1FN pode conter tabelas aninhadas.\n\nII - Uma tabela na 1FN pode possuir apenas atributos atômicos e monovalorados.\n\nIII - Uma tabela na 1FN pode possuir apenas uma chave primária do tipo simples (não composta).\n\nEstá (Estão) correta(s) a(s) assertiva(s)',2);
-INSERT INTO "questao" VALUES (2,' De acordo com a normalização de entidades em bancos de dados relacionais, a entidade cujos atributos não chave independem de outro atributo não chave está na ',9);
-INSERT INTO "questao" VALUES (3,'Normalização de dados é um processo que visa eliminar dados redundantes e garantir que a dependência de dados faça sentido. O processo de normalização gera tabelas que se apresentam normalmente em 1FN (primeira forma normal), 2FN (segunda forma normal) e 3FN (terceira forma normal). Assinale a alternativa que indica especificamente a(s) forma(s) normal(is) que aplica a regra “não possuir atributos com dependência transitiva dependentes da chave”:',11);
-INSERT INTO "questao" VALUES (4,'Em POO, duas ou mais classes, derivadas de uma mesma superclasse, podem invocar métodos que têm a mesma identificação (assinatura), mas comportamentos distintos, especializados para cada classe derivada, usando para tanto uma referência a um objeto do tipo dessa superclasse.\nO texto acima diz respeito a ',20);
-INSERT INTO "questao" VALUES (5,'Assinale a alternativa correta, considerando o paradigma da orientação a objeto, para as afirmações abaixo:\nCarlos pode andar, correr, pular. Ele tem 25 anos, é casado e trabalha com Tecnologia da Informação e Comunicação então: ',21);
-INSERT INTO "questao" VALUES (6,' Qual das alternativas a seguir define corretamente o Encapsulamento na programação orientada a objetos? ',29);
-INSERT INTO "questao" VALUES (7,'Durante o desenvolvimento de uma aplicação orientada a objetos com Java, um Técnico criou uma interface para obrigar um conjunto de classes de diferentes origens a implementar certos métodos de maneiras diferentes, viabilizando a obtenção de polimorfismo. A interface criada pelo Técnico pode ',33);
-INSERT INTO "questao" VALUES (8,'O Object Pascal é uma linguagem de programação com suporte a orientação a objetos. Sobre as ferramentas utilizadas para programar em Object Pascal, assinale a alternativa correta.',36);
-INSERT INTO "questao" VALUES (9,'A POO é um modelo de análise, projeto e programação de software baseado na composição e interação entre diversas unidades chamadas de objetos. Assinale a alternativa que apresenta os itens considerados os quatro pilares da POO.',42);
-INSERT INTO "questao" VALUES (10,'Em sistemas distribuídos, clusterização é o nome que se dá ao processo de interconexão de múltiplas máquinas com o objetivo de obter um aumento de disponibilidade, desempenho ou capacidade total de um sistema. Em relação à clusterização é correto afirmar:',44);
-INSERT INTO "questao" VALUES (11,'Computadores de baixo custo podem ser agrupados em clusters, onde exercem funções que exigem alto desempenho computacional como se fossem uma única máquina de grande porte. É correto afirmar que um cluster Beowulf com o sistema operacional Linux é constituído de vários nós escravos,',48);
-INSERT INTO "questao" VALUES (12,'O multiprocessamento simétrico pode ser implementado, por meio de clusters de servidores, usando-se o método secundário ativo, no qual um servidor secundário assume o processamento em caso de falha do servidor primário. Assinale a opção que apresenta corretamente uma justificativa para o uso do método secundário ativo.',50);
-INSERT INTO "questao" VALUES (13,'Assinale a opção que contém uma regra INVÁLIDA para Redes de Petri',53);
-INSERT INTO "questao" VALUES (14,'Sobre o processamento paralelo e distribuído, assinale a afirmação correta.',55);
-INSERT INTO "questao" VALUES (15,'Um sistema distribuído é definido como uma coleção de computadores independentes que se apresenta ao usuário como um sistema único e consistente. Baseado nos conceitos definidos para sistemas distribuídos, identifique a afirmativa ERRADA:',60);
-INSERT INTO "avaliacao" VALUES (1,'Avaliação - POO');
-INSERT INTO "avaliacao" VALUES (2,'Recuperação - POO');
-INSERT INTO "avaliacao" VALUES (3,'Avaliação - BCD');
-INSERT INTO "avaliacao" VALUES (4,'Avaliação - STD');
-INSERT INTO "avaliacao" VALUES (5,'Recuperação - STD');
 INSERT INTO "disciplina" VALUES (1,'BCD29008');
 INSERT INTO "disciplina" VALUES (2,'POO29004');
 INSERT INTO "disciplina" VALUES (3,'STD29006');

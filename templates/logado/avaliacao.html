@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block app_content %}
+<h3>{{ avaliacao.nome }}</h3>
+    {% for questao in avaliacao.questoes %}
+            <p><b>{{ questao.enunciado }}</b></p>
+        {% for alternativa in questao.alternativas %}
+            <input type="radio" name="options" id="option1" value="option1">
+                {{ alternativa.alternativa }}
+            <br>
+        {% endfor %}
+    {% endfor %}
+    <hr>
+{% endblock %}

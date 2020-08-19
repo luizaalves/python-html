@@ -1,5 +1,10 @@
-<!-- pega o conteudo de base.html e exibe tudo aqui-->
 {% extends 'base.html' %}
-{% block content %}
-<p>Teste de página tuts tuts</p>
+{% block app_content %}
+    {% block jumbotron %}
+
+        <div class="jumbotron">
+            <h1>Página inicial</h1>
+        </div>
+    {% endblock %}
+
 {% endblock %}

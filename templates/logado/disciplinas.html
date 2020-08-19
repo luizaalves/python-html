@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block app_content %}
+    <table class="table">
+        <thead>
+          <tr>
+            <th>Disciplinas</th>
+            <th>Avaliações (Não fez / Fez)</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for disciplina in disciplinas %}
+                <tr>
+                    <td><a href='/avaliacoes?id_disciplina={{ disciplina.id_disciplina }}'>
+                        {{ disciplina.nome }}
+                    </a></td>
+                    <td><p>{{ count }}{{'/'}}{{disciplina.avaliacoes|length }}</p></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
