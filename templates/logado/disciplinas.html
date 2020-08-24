@@ -9,18 +9,19 @@
         </thead>
         <tbody>
             {% for disciplina in usuario.disciplinas %}
+                {% set ns = namespace(items=0) %}
                 <tr>
-                    <td><a href='/avaliacoes?id_disciplina={{ disciplina.id_disciplina }}'>
+                    <td><a href='/avaliacoes?disciplina={{ disciplina.nome }}'>
                         {{ disciplina.nome }}
                     </a></td>
-                    {% set count = 0 %}
                     {% for avaliacao in disciplina.avaliacoes %}
-                        {% if avaliacao in usuario.avaliacoes %}
-                            {{ count }}
-                            {% set count = count + 1 %}
-                        {% endif %}
+                        {% for resposta in respostas %}
+                            {% if resposta.avaliacao_id == avaliacao.id_avaliacao %}
+                                {% set ns.items = ns.items + 1 %}
+                            {% endif %}
+                        {% endfor %}
                     {% endfor %}
-                    <td><p>{{ count }}{{'/'}}{{disciplina.avaliacoes|length }}</p></td>
+                    <td><p>{{ ns.items|string+'/'}}{{disciplina.avaliacoes|length }}</p></td>
                 </tr>
             {% endfor %}
         </tbody>

@@ -10,18 +10,23 @@
           </tr>
         </thead>
         <tbody>
-            {% for avaliacao in avaliacoes %}
+            {% set ids = [] %}
+            {% for avaliacao in disciplina.avaliacoes %}
                 <tr>
-                    {% if avaliacao in usuario.avaliacoes %}
+                {% for resposta in respostas %}
+                    {% if avaliacao.id_avaliacao == resposta.avaliacao_id %}
+                        {{ ids.append(avaliacao.id_avaliacao)}}
                         <td>{{ avaliacao.nome }}</td>
                         <td>{{ 'finalizada' }}</td>
-                        <td><p>{{ respostas.respostas_corretas }}</p></td>
-                        {% else %}
+                        <td>{{ resposta.count }}</td>
+                    {% endif %}
+                {% endfor %}
+
+                    {% if avaliacao.id_avaliacao not in ids %}
                         <td><a href='/avaliacao?id_avaliacao={{ avaliacao.id_avaliacao }}'>{{ avaliacao.nome }}</a></td>
                         <td>{{ 'a ser iniciada' }}</td>
                         <td><p>{{ '-' }}</p></td>
-                        {% endif %}
-
+                    {% endif %}
 
                 </tr>
             {% endfor %}

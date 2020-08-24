@@ -1,12 +1,4 @@
 BEGIN TRANSACTION;
-DROP TABLE IF EXISTS "usuario_avaliacao";
-CREATE TABLE IF NOT EXISTS "usuario_avaliacao" (
-	"usuario_id"	INTEGER NOT NULL,
-	"avaliacao_id"	INTEGER NOT NULL,
-	"respostas_corretas"	INTEGER,
-	FOREIGN KEY("avaliacao_id") REFERENCES "avaliacao"("id_avaliacao"),
-	FOREIGN KEY("usuario_id") REFERENCES "usuario"("id_usuario")
-);
 DROP TABLE IF EXISTS "questao";
 CREATE TABLE IF NOT EXISTS "questao" (
 	"id_questao"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -63,6 +55,17 @@ DROP TABLE IF EXISTS "alternativa";
 CREATE TABLE IF NOT EXISTS "alternativa" (
 	"id_alternativa"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	"alternativa"	TEXT NOT NULL
+);
+DROP TABLE IF EXISTS "resposta";
+CREATE TABLE IF NOT EXISTS "resposta" (
+	"count"	INTEGER,
+	"usuario_id"	INTEGER NOT NULL,
+	"avaliacao_id"	INTEGER NOT NULL,
+	"disciplina_id"	INTEGER NOT NULL,
+	"id_resposta"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	FOREIGN KEY("disciplina_id") REFERENCES "disciplina"("id_disciplina"),
+	FOREIGN KEY("usuario_id") REFERENCES "usuario"("id_usuario"),
+	FOREIGN KEY("avaliacao_id") REFERENCES "avaliacao"("id_avaliacao")
 );
 INSERT INTO "questao" VALUES (1,'Sobre a primeira forma normal (1FN), examine as assertivas abaixo.<br>I - Uma tabela na 1FN pode conter tabelas aninhadas.<br>II - Uma tabela na 1FN pode possuir apenas atributos atômicos e monovalorados.<br>III - Uma tabela na 1FN pode possuir apenas uma chave primária do tipo simples (não composta).<br>Está (Estão) correta(s) a(s) assertiva(s)',2);
 INSERT INTO "questao" VALUES (2,' De acordo com a normalização de entidades em bancos de dados relacionais, a entidade cujos atributos não chave independem de outro atributo não chave está na ',9);
@@ -205,4 +208,5 @@ INSERT INTO "alternativa" VALUES (57,'Em programação paralela não é necessá
 INSERT INTO "alternativa" VALUES (58,'Um sistema distribuído fracamente acoplado permite que máquinas e usuários do ambiente sejam fundamentalmente independentes, bem como a interação de forma limitada, quando isto for necessário, compartilhando recursos como discos e impressoras, entre outros.');
 INSERT INTO "alternativa" VALUES (59,'O modelo de computação distribuída Peer-to-Peer é uma tecnologia que estabelece uma espécie de rede virtual de computadores, onde cada estação tem capacidades e responsabilidades equivalentes.');
 INSERT INTO "alternativa" VALUES (60,'Uma vantagem dos sistemas distribuídos sobre os sistemas centralizados é a disponibilidade de software para este tipo de ambiente.');
+INSERT INTO "resposta" VALUES (2,1,3,1,1);
 COMMIT;
