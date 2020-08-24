@@ -12,11 +12,17 @@
         <tbody>
             {% for avaliacao in avaliacoes %}
                 <tr>
-                    <td><a href='/avaliacao?id_avaliacao={{ avaliacao.id_avaliacao }}'>
-                        {{ avaliacao.nome }}
-                    </a></td>
-                    <td>{{ oi }}</td>
-                    <td><p>{{ oi }}</p></td>
+                    {% if avaliacao in usuario.avaliacoes %}
+                        <td>{{ avaliacao.nome }}</td>
+                        <td>{{ 'finalizada' }}</td>
+                        <td><p>{{ respostas.respostas_corretas }}</p></td>
+                        {% else %}
+                        <td><a href='/avaliacao?id_avaliacao={{ avaliacao.id_avaliacao }}'>{{ avaliacao.nome }}</a></td>
+                        <td>{{ 'a ser iniciada' }}</td>
+                        <td><p>{{ '-' }}</p></td>
+                        {% endif %}
+
+
                 </tr>
             {% endfor %}
         </tbody>

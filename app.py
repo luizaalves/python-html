@@ -1,15 +1,14 @@
 import flask
-from flask import Flask, render_template, session, request
+from flask import Flask, render_template, session, request,Markup
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View, Text
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, func,update
+from sqlalchemy.orm import sessionmaker,mapper
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired
+
+from forms import LoginForm, AvaliacaoForm
 
 SECRET_KEY = 'string com texto aleatorio'
 
@@ -20,10 +19,10 @@ bootstrap = Bootstrap(app)
 nav = Nav()
 nav.init_app(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ddl-dml/mydb2'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-engine = create_engine("sqlite:///mydb")
+engine = create_engine("sqlite:///ddl-dml/mydb2")
 Session = sessionmaker(bind=engine)
 
 usuario_disciplina_table = db.Table('usuario_disciplina', db.metadata,
@@ -40,13 +39,13 @@ disciplina_avaliacao_table = db.Table('disciplina_avaliacao', db.metadata,
  )
 usuario_avaliacao_table = db.Table('usuario_avaliacao', db.metadata,
     db.Column('avaliacao_id', db.Integer, db.ForeignKey('avaliacao.id_avaliacao')),
-    db.Column('usuario_id', db.Integer, db.ForeignKey('usuario.id_usuario'))
+    db.Column('usuario_id', db.Integer, db.ForeignKey('usuario.id_usuario')),
+    db.Column('respostas_corretas',db.Integer)
  )
 questao_alternativa_table = db.Table('questao_alternativa', db.metadata,
      db.Column('alternativa_id', db.Integer, db.ForeignKey('alternativa.id_alternativa')),
      db.Column('questao_id', db.Integer, db.ForeignKey('questao.id_questao'))
  )
-
 class Usuario(db.Model):
     __tablename__= 'usuario'
     id_usuario=db.Column(db.Integer,primary_key=True, unique=True, autoincrement=True, nullable=False)
@@ -92,18 +91,13 @@ class Alternativas(db.Model):
     id_alternativa = db.Column(db.Integer,primary_key=True, unique=True, autoincrement=True, nullable=False)
     alternativa = db.Column(db.String, nullable=False)
 
-class LoginForm(FlaskForm):
-    email = StringField('Usuário', validators=[DataRequired('Campo obrigatório')])
-    senha = PasswordField('Senha', validators=[DataRequired('Campo obrigatório')])
-    submit = SubmitField('Entrar')
-
 @nav.navigation()
 def menu():
     menu = Navbar('Projeto 02')
     if session.get('logado'):
         usuario_logado = Usuario.query.filter_by(id_usuario=session.get('usuario')).first_or_404()
         menu.items.append(View('Disciplinas', 'listar_disciplinas'))
-        if(session['avaliacoes']):
+        if session['avaliacoes']:
             menu.items.append(View('Avaliações', 'listar_avaliacoes'))
         menu.items.append(Text('     '))
         menu.items.append(Text('Olá, '+usuario_logado.nome))
@@ -127,30 +121,74 @@ def login():
 @app.route('/disciplinas')
 def listar_disciplinas():
     if session.get('logado'):
+        #joga o valor que veio na tabela e feshow
+        #request.args.get('id_avaliacao')
         session['avaliacoes']=False
         id_user = session.get('usuario')
         if id_user is not None :
             usuario = Usuario.query.filter_by(id_usuario=id_user).first()
             if usuario is not None:
-                return render_template('logado/disciplinas.html',disciplinas=usuario.disciplinas,count=len(usuario.avaliacoes))
+                return render_template('logado/disciplinas.html',usuario=usuario)
     return flask.redirect(flask.url_for('login'))
 
-@app.route('/avaliacao')
+@app.route('/avaliacao',methods=['GET', 'POST'])
 def avaliacao():
     if session.get('logado'):
-        session['avaliacao'] = True
-        avaliacao_id = str(request.args.get('id_avaliacao'))
-        avaliacao = Avaliacoes.query.filter_by(id_avaliacao=avaliacao_id).first()
-        return render_template('logado/avaliacao.html',avaliacao=avaliacao,questoes=avaliacao.questoes)
+        session['avaliacoes']=False
+        id_usuario = session.get('usuario')
+        usuario = Usuario.query.filter_by(id_usuario=id_usuario).first()
+        id_avaliacao = request.args.get('id_avaliacao')
+        disciplina = Disciplinas.query.filter(Disciplinas.avaliacoes.any(id_avaliacao=id_avaliacao)).first()
+        if disciplina in usuario.disciplinas:
+            avaliacao = Avaliacoes.query.filter_by(id_avaliacao=id_avaliacao).first()
+            av = AvaliacaoForm()
+            if request.method=='POST':
+                sessionSQL = Session()
+                resposta_usuario_q1 = sessionSQL.query(Questoes).filter_by(alternativa_id=av.q1.data).first()
+                resposta_usuario_q2 = sessionSQL.query(Questoes).filter_by(alternativa_id=av.q2.data).first()
+                resposta_usuario_q3 = sessionSQL.query(Questoes).filter_by(alternativa_id=av.q3.data).first()
+                questoes_certas=0
+                if resposta_usuario_q1 is not None:
+                    questoes_certas=questoes_certas+1
+                if resposta_usuario_q2 is not None:
+                    questoes_certas=questoes_certas+1
+                if resposta_usuario_q3 is not None:
+                    questoes_certas=questoes_certas+1
+                #add na tabela
+                ins = usuario_avaliacao_table.insert().values(usuario_id=id_usuario,avaliacao_id=id_avaliacao,respostas_corretas=questoes_certas)
+                conn = engine.connect()
+                result = conn.execute(ins)
+                session['avaliacoes'] = True
+                return render_template('logado/avaliacoes.html',avaliacoes=disciplina.avaliacoes,disciplina=disciplina,usuario=usuario)
+
+            av.q1.label = Markup(avaliacao.questoes[0].enunciado)
+            av.q1.choices = [(alternativa.id_alternativa, alternativa.alternativa) for alternativa in avaliacao.questoes[0].alternativas]
+
+            av.q2.label = Markup(avaliacao.questoes[1].enunciado)
+            av.q2.choices = [(alternativa.id_alternativa, alternativa.alternativa) for alternativa in
+                                        avaliacao.questoes[1].alternativas]
+
+            av.q3.label = Markup(avaliacao.questoes[2].enunciado)
+            av.q3.choices = [(alternativa.id_alternativa, alternativa.alternativa) for alternativa in
+                                        avaliacao.questoes[2].alternativas]
+            return render_template('logado/avaliacao.html',avaliacao=avaliacao,form=av)
     return flask.redirect(flask.url_for('login'))
 
 @app.route('/avaliacoes')
 def listar_avaliacoes():
+    print(session.get('logado'))
     if session.get('logado'):
         session['avaliacoes'] = True
+        id_usuario = session.get('usuario')
+        usuario = Usuario.query.filter_by(id_usuario=id_usuario).first()
         disciplina_id = str(request.args.get('id_disciplina'))
-        disciplina=Disciplinas.query.filter_by(id_disciplina=disciplina_id).first()
-        return render_template('logado/avaliacoes.html',avaliacoes=disciplina.avaliacoes,disciplina=disciplina)
+        if disciplina_id is None:
+            disciplina_id = session.get('id_disciplina')
+        session['id_disciplina'] = disciplina_id
+        disciplina = Disciplinas.query.filter_by(id_disciplina=disciplina_id).first()
+        if disciplina in usuario.disciplinas:
+            print(usuario.respostas_corretas)
+            return render_template('logado/avaliacoes.html',avaliacoes=disciplina.avaliacoes,disciplina=disciplina,usuario=usuario,respostas=respostas)
     return flask.redirect(flask.url_for('login'))
 
 @app.route('/sair')
@@ -162,7 +200,6 @@ def sair():
 
 @app.route('/')
 def inicial():
-    session['logado'] = False
     if session.get('logado'):
         return flask.redirect(flask.url_for('listar_disciplinas'))
     return flask.redirect(flask.url_for('login'))

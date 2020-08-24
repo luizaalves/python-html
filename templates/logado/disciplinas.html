@@ -4,15 +4,22 @@
         <thead>
           <tr>
             <th>Disciplinas</th>
-            <th>Avaliações (Não fez / Fez)</th>
+            <th>Avaliações (Feitas / total)</th>
           </tr>
         </thead>
         <tbody>
-            {% for disciplina in disciplinas %}
+            {% for disciplina in usuario.disciplinas %}
                 <tr>
                     <td><a href='/avaliacoes?id_disciplina={{ disciplina.id_disciplina }}'>
                         {{ disciplina.nome }}
                     </a></td>
+                    {% set count = 0 %}
+                    {% for avaliacao in disciplina.avaliacoes %}
+                        {% if avaliacao in usuario.avaliacoes %}
+                            {{ count }}
+                            {% set count = count + 1 %}
+                        {% endif %}
+                    {% endfor %}
                     <td><p>{{ count }}{{'/'}}{{disciplina.avaliacoes|length }}</p></td>
                 </tr>
             {% endfor %}
