@@ -19,10 +19,10 @@ bootstrap = Bootstrap(app)
 nav = Nav()
 nav.init_app(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ddl-dml/ddl-dml'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ddl-dml'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-engine = create_engine("sqlite:///ddl-dml/ddl-dml")
+engine = create_engine("sqlite:///ddl-dml")
 Session = sessionmaker(bind=engine)
 
 usuario_disciplina_table = db.Table('usuario_disciplina', db.metadata,
