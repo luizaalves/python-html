@@ -116,12 +116,14 @@ def menu():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        usuario = Usuario.query.filter_by(email=form.email.data).first_or_404()
+        usuario = Usuario.query.filter_by(email=form.email.data).first()
         if usuario is not None:
             if usuario.senha==form.senha.data:
                 session['logado']=True
                 session['usuario']=usuario.id_usuario
                 return flask.redirect(flask.url_for('listar_disciplinas'))
+        else:
+            return render_template('login.html', form=form)
     session['usuario'] = None
     session['logado'] = False
     return render_template('login.html', form=form)
@@ -129,8 +131,6 @@ def login():
 @app.route('/disciplinas')
 def listar_disciplinas():
     if session.get('logado'):
-        #joga o valor que veio na tabela e feshow
-        #request.args.get('id_avaliacao')
         session['avaliacoes']=False
         id_user = session.get('usuario')
         if id_user is not None :
